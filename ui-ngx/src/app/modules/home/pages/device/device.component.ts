@@ -84,7 +84,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   buildForm(entity: DeviceInfo): UntypedFormGroup {
     const form = this.fb.group(
       {
-        name: [entity ? entity.name : '', [Validators.required, Validators.maxLength(255)]],
+        name: [entity ? this.displayName : '', [Validators.required, Validators.maxLength(255)]],
         deviceProfileId: [entity ? entity.deviceProfileId : null, [Validators.required]],
         firmwareId: [entity ? entity.firmwareId : null],
         softwareId: [entity ? entity.softwareId : null],
@@ -174,4 +174,12 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
       }
     }
   }
+
+  //Trí: xử lý tên thiết bị có dạng TENTHIETBI_REMODEID
+  get displayName(): string {
+  const name = this.entity?.name || '';
+  const index = name.indexOf('_');
+  return index !== -1 ? name.substring(0, index) : name;
+}
+
 }

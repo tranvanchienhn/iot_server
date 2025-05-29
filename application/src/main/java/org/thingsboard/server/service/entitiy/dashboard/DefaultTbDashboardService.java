@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.service.entitiy.dashboard;
 
+import org.thingsboard.server.controller.BaseController;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,22 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DASHBOARD), actionType,
                     user, e, dashboardId.toString(), customerId.toString());
+            throw e;
+        }
+    }
+
+    @Override
+    public Dashboard assignNoauthDashboardToCustomer(String TenantId,String CustomerId, String DashboardId ) throws ThingsboardException {
+        //ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
+        String tenantId = TenantId;
+        String customerId = CustomerId;
+        String dashboardId = DashboardId;
+        try {
+            Dashboard savedDashboard = checkNotNull(dashboardService.assignNoauthDashboardToCustomer(tenantId, dashboardId, customerId));
+           
+            return savedDashboard;
+        } catch (Exception e) {
+          
             throw e;
         }
     }

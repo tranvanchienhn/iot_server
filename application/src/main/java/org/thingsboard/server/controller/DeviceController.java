@@ -219,7 +219,7 @@ public class DeviceController extends BaseController {
 
     @ApiOperation(value = "Delete device (deleteDevice)",
             notes = "Deletes the device, it's credentials and all the relations (from and to the device). Referencing non-existing device Id will cause an error." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.DELETE)
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteDevice(@Parameter(description = DEVICE_ID_PARAM_DESCRIPTION)
@@ -231,8 +231,8 @@ public class DeviceController extends BaseController {
     }
 
     @ApiOperation(value = "Assign device to customer (assignDeviceToCustomer)",
-            notes = "Creates assignment of the device to customer. Customer will be able to query device afterwards." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+            notes = "Creates assignment of the device to customer. Customer will be able to query device afterwards." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/customer/{customerId}/device/{deviceId}", method = RequestMethod.POST)
     @ResponseBody
     public Device assignDeviceToCustomer(@Parameter(description = CUSTOMER_ID_PARAM_DESCRIPTION)
@@ -249,8 +249,8 @@ public class DeviceController extends BaseController {
     }
 
     @ApiOperation(value = "Unassign device from customer (unassignDeviceFromCustomer)",
-            notes = "Clears assignment of the device to customer. Customer will not be able to query device afterwards." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+            notes = "Clears assignment of the device to customer. Customer will not be able to query device afterwards." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/customer/device/{deviceId}", method = RequestMethod.DELETE)
     @ResponseBody
     public Device unassignDeviceFromCustomer(@Parameter(description = DEVICE_ID_PARAM_DESCRIPTION)
@@ -316,7 +316,7 @@ public class DeviceController extends BaseController {
                     " - 'deviceId.id' (this is id of Device).\n" +
                     "Remove 'tenantId' and optionally 'customerId' from the request body example (below) to create new Device entity." +
                     TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/device/credentials", method = RequestMethod.POST)
     @ResponseBody
     public DeviceCredentials updateDeviceCredentials(

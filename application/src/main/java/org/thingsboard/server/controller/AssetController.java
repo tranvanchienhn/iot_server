@@ -145,7 +145,7 @@ public class AssetController extends BaseController {
 
     @ApiOperation(value = "Delete asset (deleteAsset)",
             notes = "Deletes the asset and all the relations (from and to the asset). Referencing non-existing asset Id will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/asset/{assetId}", method = RequestMethod.DELETE)
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteAsset(@Parameter(description = ASSET_ID_PARAM_DESCRIPTION) @PathVariable(ASSET_ID) String strAssetId) throws Exception {
@@ -157,7 +157,7 @@ public class AssetController extends BaseController {
 
     @ApiOperation(value = "Assign asset to customer (assignAssetToCustomer)",
             notes = "Creates assignment of the asset to customer. Customer will be able to query asset afterwards." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/customer/{customerId}/asset/{assetId}", method = RequestMethod.POST)
     @ResponseBody
     public Asset assignAssetToCustomer(@Parameter(description = CUSTOMER_ID_PARAM_DESCRIPTION) @PathVariable("customerId") String strCustomerId,
@@ -173,7 +173,7 @@ public class AssetController extends BaseController {
 
     @ApiOperation(value = "Unassign asset from customer (unassignAssetFromCustomer)",
             notes = "Clears assignment of the asset to customer. Customer will not be able to query asset afterwards." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/customer/asset/{assetId}", method = RequestMethod.DELETE)
     @ResponseBody
     public Asset unassignAssetFromCustomer(@Parameter(description = ASSET_ID_PARAM_DESCRIPTION) @PathVariable(ASSET_ID) String strAssetId) throws ThingsboardException {
@@ -191,7 +191,7 @@ public class AssetController extends BaseController {
             notes = "Asset will be available for non-authorized (not logged-in) users. " +
                     "This is useful to create dashboards that you plan to share/embed on a publicly available website. " +
                     "However, users that are logged-in and belong to different tenant will not be able to access the asset." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/customer/public/asset/{assetId}", method = RequestMethod.POST)
     @ResponseBody
     public Asset assignAssetToPublicCustomer(@Parameter(description = ASSET_ID_PARAM_DESCRIPTION) @PathVariable(ASSET_ID) String strAssetId) throws ThingsboardException {

@@ -45,6 +45,8 @@ public interface DashboardService extends EntityDaoService {
     Dashboard saveDashboard(Dashboard dashboard);
 
     Dashboard assignDashboardToCustomer(TenantId tenantId, DashboardId dashboardId, CustomerId customerId);
+     
+    Dashboard assignNoauthDashboardToCustomer(String tenantId, String dashboardId, String customerId);
 
     Dashboard unassignDashboardFromCustomer(TenantId tenantId, DashboardId dashboardId, CustomerId customerId);
 

@@ -222,6 +222,28 @@ public class DashboardController extends BaseController {
         return tbDashboardService.assignDashboardToCustomer(dashboard, customer, getCurrentUser());
     }
 
+    @ApiOperation(value = "Assign the Dashboard (assignDashboardToCustomer)",
+            notes = "Gán thiết bị với người dùng không cần phải xác thực")
+    //@PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PostMapping(value = "/noauth/customer/{customerId}/dashboard/{dashboardId}")
+    public Dashboard assignNoauthDashboardToCustomer(
+            @Parameter(description = CUSTOMER_ID_PARAM_DESCRIPTION)
+            @PathVariable(CUSTOMER_ID) String strCustomerId,
+            @Parameter(description = DASHBOARD_ID_PARAM_DESCRIPTION)
+            @PathVariable(DASHBOARD_ID) String strDashboardId,
+             @Parameter(description = "UserId")
+            @PathVariable("userID") String strUserId) throws ThingsboardException {
+        checkParameter(CUSTOMER_ID, strCustomerId);
+        checkParameter(DASHBOARD_ID, strDashboardId);
+
+        //CustomerId customerId = new CustomerId(toUUID(strCustomerId));
+        //Customer customer = checkCustomerId(customerId, Operation.READ);
+
+        //DashboardId dashboardId = new DashboardId(toUUID(strDashboardId));
+        //Dashboard dashboard = checkDashboardId(dashboardId, Operation.ASSIGN_TO_CUSTOMER);
+        return tbDashboardService.assignNoauthDashboardToCustomer(strDashboardId, strCustomerId, strUserId);
+    }
+
     @ApiOperation(value = "Unassign the Dashboard (unassignDashboardFromCustomer)",
             notes = "Unassign the Dashboard from specified Customer or do nothing if the Dashboard is already assigned to that Customer. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -261,8 +283,8 @@ public class DashboardController extends BaseController {
 
     @ApiOperation(value = "Adds the Dashboard Customers (addDashboardCustomers)",
             notes = "Adds the list of Customers to the existing list of assignments for the Dashboard. Keeps previous assignments to customers that are not in the provided list. " +
-                    "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+                    "Returns the Dashboard object." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @PostMapping(value = "/dashboard/{dashboardId}/customers/add")
     public Dashboard addDashboardCustomers(
             @Parameter(description = DASHBOARD_ID_PARAM_DESCRIPTION)
@@ -278,8 +300,8 @@ public class DashboardController extends BaseController {
 
     @ApiOperation(value = "Remove the Dashboard Customers (removeDashboardCustomers)",
             notes = "Removes the list of Customers from the existing list of assignments for the Dashboard. Keeps other assignments to customers that are not in the provided list. " +
-                    "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+                    "Returns the Dashboard object." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @PostMapping(value = "/dashboard/{dashboardId}/customers/remove")
     public Dashboard removeDashboardCustomers(
             @Parameter(description = DASHBOARD_ID_PARAM_DESCRIPTION)
@@ -329,8 +351,8 @@ public class DashboardController extends BaseController {
 
     @ApiOperation(value = "Get Tenant Dashboards by System Administrator (getTenantDashboards)",
             notes = "Returns a page of dashboard info objects owned by tenant. " + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS +
-                    SYSTEM_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
+            TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN','TENANT_ADMIN','CUSTOMER_USER')")
     @RequestMapping(value = "/tenant/{tenantId}/dashboards", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<DashboardInfo> getTenantDashboards(
@@ -372,6 +394,36 @@ public class DashboardController extends BaseController {
             @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
             @RequestParam(required = false) String sortOrder) throws ThingsboardException {
         TenantId tenantId = getCurrentUser().getTenantId();
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        if (mobile != null && mobile) {
+            return checkNotNull(dashboardService.findMobileDashboardsByTenantId(tenantId, pageLink));
+        } else {
+            return checkNotNull(dashboardService.findDashboardsByTenantId(tenantId, pageLink));
+        }
+    }
+
+    //Trí: lấy ra danh sách dashboard của tenant để gán khi tạo người dùng mới trên mobile app
+    @ApiOperation(value = "Get Tenant Dashboards (getTenantDashboards)",
+            notes = "Returns a page of dashboard info objects owned by the tenant of a current user. "
+                    + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
+    //@PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/noauth/tenant/dashboards", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public PageData<DashboardInfo> getTenantDashboards(
+            @Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
+            @RequestParam int pageSize,
+            @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
+            @RequestParam int page,
+            @Parameter(description = HIDDEN_FOR_MOBILE)
+            @RequestParam(required = false) Boolean mobile,
+            @Parameter(description = DASHBOARD_TEXT_SEARCH_DESCRIPTION)
+            @RequestParam(required = false) String textSearch,
+            @Parameter(description = SORT_PROPERTY_DESCRIPTION, schema = @Schema(allowableValues = {"createdTime", "title"}))
+            @RequestParam(required = false) String sortProperty,
+            @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = true) String strTenantId) throws ThingsboardException {
+        TenantId tenantId = TenantId.fromUUID(toUUID(strTenantId));
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         if (mobile != null && mobile) {
             return checkNotNull(dashboardService.findMobileDashboardsByTenantId(tenantId, pageLink));

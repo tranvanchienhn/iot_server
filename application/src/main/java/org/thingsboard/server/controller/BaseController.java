@@ -519,7 +519,7 @@ public abstract class BaseController {
         }
     }
 
-    UUID toUUID(String id) throws ThingsboardException {
+     UUID toUUID(String id) throws ThingsboardException {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {

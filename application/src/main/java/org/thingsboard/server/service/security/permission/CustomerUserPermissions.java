@@ -27,10 +27,12 @@ import org.thingsboard.server.common.data.id.TbResourceId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.service.security.model.SecurityUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(value = "customerUserPermissions")
 public class CustomerUserPermissions extends AbstractPermissions {
-
+private static final Logger log = LoggerFactory.getLogger(CustomerUserPermissions.class);
     public CustomerUserPermissions() {
         super();
         put(Resource.ALARM, customerAlarmPermissionChecker);
@@ -64,21 +66,29 @@ public class CustomerUserPermissions extends AbstractPermissions {
     };
 
     private static final PermissionChecker customerEntityPermissionChecker =
-            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.READ_CREDENTIALS,
+            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.CREATE, Operation.READ_CREDENTIALS,
                     Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY, Operation.RPC_CALL, Operation.CLAIM_DEVICES,
-                    Operation.WRITE, Operation.WRITE_ATTRIBUTES, Operation.WRITE_TELEMETRY) {
+                    Operation.WRITE, Operation.WRITE_ATTRIBUTES, Operation.WRITE_TELEMETRY, Operation.ASSIGN_TO_CUSTOMER,
+                    Operation.UNASSIGN_FROM_CUSTOMER) {
 
                 @Override
                 @SuppressWarnings("unchecked")
+                
                 public boolean hasPermission(SecurityUser user, Operation operation, EntityId entityId, HasTenantId entity) {
-
-                    if (!super.hasPermission(user, operation, entityId, entity)) {
+                    log.info("TRI: Checking device access: userCustomerId={}, deviceCustomerId={}", user.getCustomerId(), ((HasCustomerId) entity).getCustomerId());
+                    boolean superPerm = super.hasPermission(user, operation, entityId, entity);
+                    log.info("TRI: super.hasPermission({}, {}, {}, {}) = {}", user, operation, entityId, entity, superPerm);
+                    
+                    if (!superPerm) {
+                        
                         return false;
                     }
                     if (!user.getTenantId().equals(entity.getTenantId())) {
+                        log.info("user.getTenantId: {}", user.getTenantId().equals(entity.getTenantId()));
                         return false;
                     }
                     if (!(entity instanceof HasCustomerId)) {
+                        log.info("entity instanceof HasCustomerId: {}", (entity instanceof HasCustomerId));
                         return false;
                     }
                     return operation.equals(Operation.CLAIM_DEVICES) || user.getCustomerId().equals(((HasCustomerId) entity).getCustomerId());
@@ -86,7 +96,7 @@ public class CustomerUserPermissions extends AbstractPermissions {
             };
 
     private static final PermissionChecker customerPermissionChecker =
-            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY) {
+            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.READ_CREDENTIALS, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY) {
 
                 @Override
                 @SuppressWarnings("unchecked")
@@ -120,7 +130,7 @@ public class CustomerUserPermissions extends AbstractPermissions {
             };
 
     private static final PermissionChecker customerDashboardPermissionChecker =
-            new PermissionChecker.GenericPermissionChecker<DashboardId, DashboardInfo>(Operation.READ, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY) {
+            new PermissionChecker.GenericPermissionChecker<DashboardId, DashboardInfo>(Operation.READ, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY,Operation.ASSIGN_TO_CUSTOMER, Operation.UNASSIGN_FROM_CUSTOMER ) {
 
                 @Override
                 public boolean hasPermission(SecurityUser user, Operation operation, DashboardId dashboardId, DashboardInfo dashboard) {
@@ -188,7 +198,7 @@ public class CustomerUserPermissions extends AbstractPermissions {
         }
     };
 
-    private static final PermissionChecker profilePermissionChecker = new PermissionChecker.GenericPermissionChecker(Operation.READ) {
+    private static final PermissionChecker profilePermissionChecker = new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.READ_CREDENTIALS) {
 
         @Override
         @SuppressWarnings("unchecked")

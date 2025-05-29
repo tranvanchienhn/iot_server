@@ -60,6 +60,7 @@ import org.thingsboard.server.dao.sql.JpaExecutorService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -199,6 +200,33 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
         if (dashboard.addAssignedCustomer(customer)) {
             try {
                 createRelation(tenantId, new EntityRelation(customerId, dashboardId, EntityRelation.CONTAINS_TYPE, RelationTypeGroup.DASHBOARD));
+            } catch (Exception e) {
+                log.warn("[{}] Failed to create dashboard relation. Customer Id: [{}]", dashboardId, customerId);
+                throw new RuntimeException(e);
+            }
+            return saveDashboard(dashboard);
+        } else {
+            return dashboard;
+        }
+    }
+
+    //Tri assign dashboard to customer noauthentication
+    @Override
+    public Dashboard assignNoauthDashboardToCustomer(String tenantId, String dashboardId, String customerId) {
+        TenantId _TenantId = TenantId.fromUUID(UUID.fromString(tenantId));
+        DashboardId _DashboardId = DashboardId.fromString(dashboardId);
+        Dashboard dashboard = findDashboardById(_TenantId, _DashboardId);
+        
+        Customer _Customer = customerDao.findById(_TenantId, UUID.fromString(customerId));
+        if (_Customer == null) {
+            throw new DataValidationException("Can't assign dashboard to non-existent customer!");
+        }
+        if (!_Customer.getTenantId().getId().equals(dashboard.getTenantId().getId())) {
+            throw new DataValidationException("Can't assign dashboard to customer from different tenant!");
+        }
+        if (dashboard.addAssignedCustomer(_Customer)) {
+            try {
+                createRelation(_TenantId, new EntityRelation(_Customer.getId(), _DashboardId, EntityRelation.CONTAINS_TYPE, RelationTypeGroup.DASHBOARD));
             } catch (Exception e) {
                 log.warn("[{}] Failed to create dashboard relation. Customer Id: [{}]", dashboardId, customerId);
                 throw new RuntimeException(e);

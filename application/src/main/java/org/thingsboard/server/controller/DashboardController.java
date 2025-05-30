@@ -222,26 +222,28 @@ public class DashboardController extends BaseController {
         return tbDashboardService.assignDashboardToCustomer(dashboard, customer, getCurrentUser());
     }
 
-    @ApiOperation(value = "Assign the Dashboard (assignDashboardToCustomer)",
+    //String TenantId,String CustomerId, String DashboardId 
+    @ApiOperation(value = "Assign the Dashboard without authentication (assignNoauthDashboardToCustomer)",
             notes = "Gán thiết bị với người dùng không cần phải xác thực")
     //@PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @PostMapping(value = "/noauth/customer/{customerId}/dashboard/{dashboardId}")
+    @PostMapping(value = "/noauth/customer/{customerId}/dashboard/{dashboardId}/tenant/{tenantId}")
     public Dashboard assignNoauthDashboardToCustomer(
             @Parameter(description = CUSTOMER_ID_PARAM_DESCRIPTION)
             @PathVariable(CUSTOMER_ID) String strCustomerId,
             @Parameter(description = DASHBOARD_ID_PARAM_DESCRIPTION)
             @PathVariable(DASHBOARD_ID) String strDashboardId,
-             @Parameter(description = "UserId")
-            @PathVariable("userID") String strUserId) throws ThingsboardException {
+            @Parameter(description = TENANT_ID_PARAM_DESCRIPTION)
+            @PathVariable(TENANT_ID) String strTenantId) 
+            throws ThingsboardException {
         checkParameter(CUSTOMER_ID, strCustomerId);
         checkParameter(DASHBOARD_ID, strDashboardId);
-
+        checkParameter(TENANT_ID, strTenantId);
         //CustomerId customerId = new CustomerId(toUUID(strCustomerId));
         //Customer customer = checkCustomerId(customerId, Operation.READ);
 
         //DashboardId dashboardId = new DashboardId(toUUID(strDashboardId));
         //Dashboard dashboard = checkDashboardId(dashboardId, Operation.ASSIGN_TO_CUSTOMER);
-        return tbDashboardService.assignNoauthDashboardToCustomer(strDashboardId, strCustomerId, strUserId);
+        return tbDashboardService.assignNoauthDashboardToCustomer(strDashboardId, strCustomerId, strTenantId);
     }
 
     @ApiOperation(value = "Unassign the Dashboard (unassignDashboardFromCustomer)",

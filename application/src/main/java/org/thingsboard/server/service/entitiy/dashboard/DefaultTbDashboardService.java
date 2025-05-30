@@ -102,7 +102,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
     }
 
     @Override
-    public Dashboard assignNoauthDashboardToCustomer(String TenantId,String CustomerId, String DashboardId ) throws ThingsboardException {
+    public Dashboard assignNoauthDashboardToCustomer(String DashboardId,String CustomerId,String TenantId ) throws ThingsboardException {
         //ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
         String tenantId = TenantId;
         String customerId = CustomerId;

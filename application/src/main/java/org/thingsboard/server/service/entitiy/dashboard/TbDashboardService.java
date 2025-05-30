@@ -31,7 +31,7 @@ public interface TbDashboardService extends SimpleTbEntityService<Dashboard> {
 
     Dashboard assignDashboardToCustomer(Dashboard dashboard, Customer customer, User user) throws ThingsboardException;
 
-    Dashboard assignNoauthDashboardToCustomer(String dashboardId, String customerId, String userId) throws ThingsboardException;
+    Dashboard assignNoauthDashboardToCustomer(String dashboardId, String customerId, String tenantId) throws ThingsboardException;
 
     Dashboard assignDashboardToPublicCustomer(Dashboard dashboard, User user) throws ThingsboardException;
 

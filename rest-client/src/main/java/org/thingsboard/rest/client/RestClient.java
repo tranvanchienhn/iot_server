@@ -1105,6 +1105,19 @@ public class RestClient implements Closeable {
         }
     }
 
+    public Optional<Dashboard> assignNoauthDashboardToCustomer(String dashboardId, String customerId, String tenantId) {
+        try {
+            ResponseEntity<Dashboard> dashboard = restTemplate.postForEntity(baseURL + "/api/noauth/customer/{customerId}/dashboard/{dashboardId}/tenant/{tenantId}", null, Dashboard.class, customerId, dashboardId, tenantId);
+            return Optional.ofNullable(dashboard.getBody());
+        } catch (HttpClientErrorException exception) {
+            if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return Optional.empty();
+            } else {
+                throw exception;
+            }
+        }
+    }
+
     public Optional<Dashboard> unassignDashboardFromCustomer(CustomerId customerId, DashboardId dashboardId) {
         try {
             ResponseEntity<Dashboard> dashboard = restTemplate.exchange(baseURL + "/api/customer/{customerId}/dashboard/{dashboardId}", HttpMethod.DELETE, HttpEntity.EMPTY, Dashboard.class, customerId.getId(), dashboardId.getId());

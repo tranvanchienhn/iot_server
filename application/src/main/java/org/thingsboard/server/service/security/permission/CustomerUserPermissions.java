@@ -66,7 +66,7 @@ private static final Logger log = LoggerFactory.getLogger(CustomerUserPermission
     };
 
     private static final PermissionChecker customerEntityPermissionChecker =
-            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.CREATE, Operation.READ_CREDENTIALS,
+            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.DELETE, Operation.CREATE, Operation.READ_CREDENTIALS,
                     Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY, Operation.RPC_CALL, Operation.CLAIM_DEVICES,
                     Operation.WRITE, Operation.WRITE_ATTRIBUTES, Operation.WRITE_TELEMETRY, Operation.ASSIGN_TO_CUSTOMER,
                     Operation.UNASSIGN_FROM_CUSTOMER) {
@@ -96,7 +96,7 @@ private static final Logger log = LoggerFactory.getLogger(CustomerUserPermission
             };
 
     private static final PermissionChecker customerPermissionChecker =
-            new PermissionChecker.GenericPermissionChecker(Operation.READ, Operation.READ_CREDENTIALS, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY) {
+            new PermissionChecker.GenericPermissionChecker(Operation.READ,Operation.DELETE,Operation.READ_CREDENTIALS, Operation.READ_ATTRIBUTES, Operation.READ_TELEMETRY) {
 
                 @Override
                 @SuppressWarnings("unchecked")

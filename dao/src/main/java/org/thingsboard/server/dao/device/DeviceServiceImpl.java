@@ -250,7 +250,7 @@ public class DeviceServiceImpl extends CachedVersionedEntityService<DeviceCacheK
         } catch (Exception t) {
             handleEvictEvent(deviceCacheEvictEvent);
             checkConstraintViolation(t,
-                    "device_name_unq_key", "Device with such name already exists!",
+                    //"device_name_unq_key", "Device with such name already exists!",
                     "device_external_id_unq_key", "Device with such external id already exists!");
             throw t;
         }
